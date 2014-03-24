@@ -61,7 +61,6 @@ public final class Grok {
       Pattern compiledPattern = dictionary.compileExpression(expression);
       Matcher matcher = compiledPattern.matcher(rawDataLine);
 
-
       System.out.println("Number of matches: " + matcher.groupCount());
 
       if (matcher.find()) {
@@ -71,7 +70,6 @@ public final class Grok {
            System.out.println(group.getKey() + " = " + group.getValue());
         }
       }
-
     }
   }
 }

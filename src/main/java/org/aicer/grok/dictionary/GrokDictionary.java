@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.aicer.grok.exception.GrokCompilationException;
-import org.aicer.grok.exception.GrokException;
 import org.apache.log4j.Logger;
 
 import com.google.code.regexp.Pattern;
@@ -156,11 +155,11 @@ public final class GrokDictionary {
   private void loadDictionary(final File file) throws IOException {
 
     if (false == file.exists()) {
-      throw new GrokException("The path specfied could not be found: " + file);
+      throw new GrokCompilationException("The path specfied could not be found: " + file);
     }
 
     if (false == file.canRead()) {
-      throw new GrokException("The path specified is not readable" + file);
+      throw new GrokCompilationException("The path specified is not readable" + file);
     }
 
     if (file.isDirectory()) {
