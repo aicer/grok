@@ -23,7 +23,7 @@ public final class Grok {
 
   public static void main(String[] args) {
 
-    final String rawDataLine = "1234567 - israel.ekpo@massivelogdata.net cc55ZZ35 1789 Whats going on?";
+    final String rawDataLine = "1234567 - israel.ekpo@massivelogdata.net cc55ZZ35 1789 Massive log data incoming";
 
     final String expression = "%{NOTSPACE:username} %{USERNAME:password} %{INT:yearOfBirth}";
 
