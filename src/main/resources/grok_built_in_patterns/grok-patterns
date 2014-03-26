@@ -15,6 +15,8 @@ DATA .*?
 GREEDYDATA .*
 QUOTEDSTRING (?>(?<!\\)(?>"(?>\\.|[^\\"]+)+"|""|(?>'(?>\\.|[^\\']+)+')|''|(?>`(?>\\.|[^\\`]+)+`)|``))
 UUID [A-Fa-f0-9]{8}-(?:[A-Fa-f0-9]{4}-){3}[A-Fa-f0-9]{12}
+DOMAINTLD [a-zA-Z]+
+EMAIL %{NOTSPACE}@%{WORD}\.%{DOMAINTLD}
 
 # Networking
 MAC (?:%{CISCOMAC}|%{WINDOWSMAC}|%{COMMONMAC})

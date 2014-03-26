@@ -3,44 +3,64 @@ package org.aicer.grok.dictionary;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.aicer.grok.exception.GrokCompilationException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.google.code.regexp.Pattern;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
 
 public final class GrokDictionary {
 
-  private static final Logger logger = Logger.getLogger(GrokDictionary.class);
+  private static final Logger logger = LoggerFactory.getLogger(GrokDictionary.class);
 
   private final Map<String, String> regexDictionary = new HashMap<String, String>();
+
+  private boolean ready = false;
 
   public GrokDictionary() {
 
   }
 
+  public int getDictionarySize() {
+    return this.regexDictionary.size();
+  }
+
   /**
-   * Loads the Grok dictionary
+   * Returns a duplicate copy of the regex dictionary
+   *
+   * @return A copy of the dictionary
+   */
+  public Map<String, String> getRegexDictionary() {
+    return new HashMap<String, String>(this.regexDictionary);
+  }
+
+  /**
+   * Digests all the dictionaries loaded so far
    *
    * @param file
    * @throws GrokCompilationException if there is a problem
    */
-  public void load(final File file) {
-
-    try {
-      loadDictionary(file);
-    } catch (IOException e) {
-      logger.error("Grok Comipilation error ", e);
-      throw new GrokCompilationException(e);
-    }
-
+  public void bind() {
     digestExpressions();
+    ready = (regexDictionary.size() > 0); // Expression have been digested and we have at least one entry
+  }
+
+  /**
+   * This method throws a run time exception if the bind() method was not called and the dictionary is empty.
+   * @throws IllegalStateException
+   */
+  private void throwErrorIfDictionaryIsNotReady() {
+
+    if (false == ready) {
+      throw new IllegalStateException("Dictionary is empty. Please add at least one dictionary and then invoke the bind() method.");
+    }
   }
 
   /**
@@ -49,24 +69,17 @@ public final class GrokDictionary {
    * This uses the internal dictionary of named regular expressions
    *
    * @param expression
-   * @return
+   * @return The compiled expression
    */
   public Pattern compileExpression(final String expression) {
 
-    final String digestedExpression = digestExpression(expression);
+    throwErrorIfDictionaryIsNotReady();
+
+    final String digestedExpression = digestExpressionAux(expression);
+
+    logger.debug("Digested [" + expression + "] into [" + digestedExpression + "] before compilation");
 
     return Pattern.compile(digestedExpression);
-  }
-
-  public int getDictionarySize() {
-    return this.regexDictionary.size();
-  }
-
-  public void display() {
-
-    for(Map.Entry<String, String> entry: regexDictionary.entrySet()) {
-      System.out.println(entry.getKey() + entry.getValue());
-    }
   }
 
   private void digestExpressions() {
@@ -80,14 +93,13 @@ public final class GrokDictionary {
       for(Map.Entry<String, String> entry: regexDictionary.entrySet()) {
 
         String originalExpression = entry.getValue();
-        String digestedExpression = digestExpression(originalExpression);
+        String digestedExpression = digestExpressionAux(originalExpression);
         wasModified = (originalExpression != digestedExpression);
 
         if (wasModified) {
           entry.setValue(digestedExpression);
           break; // stop the for loop
         }
-
       }
     }
   }
@@ -96,9 +108,21 @@ public final class GrokDictionary {
    * Digests the original expression into a pure named regex
    *
    * @param originalExpression
-   * @return
+   * @return The digested expression
    */
   public String digestExpression(String originalExpression) {
+
+    throwErrorIfDictionaryIsNotReady();
+
+    return digestExpressionAux(originalExpression);
+  }
+
+  /**
+   * Digests the original expression into a pure named regex
+   *
+   * @param originalExpression
+   */
+  private String digestExpressionAux(String originalExpression) {
 
     final String PATTERN_START = "%{";
     final String PATTERN_STOP = "}";
@@ -152,7 +176,38 @@ public final class GrokDictionary {
     return originalExpression;
   }
 
-  private void loadDictionary(final File file) throws IOException {
+  /**
+   * The Grok dictionary file or directory containing the dictionaries
+   *
+   * @param file The file or directory containing the dictionaries
+   *
+   * @throws IOException
+   */
+  public void addDictionary(final File file) {
+    try {
+      addDictionaryAux(file);
+    } catch (IOException e) {
+      throw new GrokCompilationException(e);
+    }
+  }
+
+  /**
+   * Loads dictionary from an input stream
+   *
+   * This can be used to load dictionaries available in the class path <p>
+   *
+   * @param inputStream
+   */
+  public void addDictionary(final InputStream inputStream) {
+
+    try {
+      addDictionaryAux(new InputStreamReader(inputStream, "UTF-8"));
+    } catch (IOException e) {
+      throw new GrokCompilationException(e);
+    }
+  }
+
+  private void addDictionaryAux(final File file) throws IOException {
 
     if (false == file.exists()) {
       throw new GrokCompilationException("The path specfied could not be found: " + file);
@@ -168,7 +223,7 @@ public final class GrokDictionary {
 
       // Cycle through the directory and process all child files or folders
       for (File child : children) {
-        loadDictionary(child);
+        addDictionaryAux(child);
       }
 
     } else {
@@ -176,7 +231,7 @@ public final class GrokDictionary {
       Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8");
 
       try {
-        loadDictionary(reader);
+        addDictionaryAux(reader);
       } finally {
         Closeables.closeQuietly(reader);
       }
@@ -185,7 +240,7 @@ public final class GrokDictionary {
   }
 
 
-  private void loadDictionary(Reader reader) throws IOException {
+  private void addDictionaryAux(Reader reader) throws IOException {
 
     for (String currentFileLine : CharStreams.readLines(reader)) {
 

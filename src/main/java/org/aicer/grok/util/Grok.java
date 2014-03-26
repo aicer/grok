@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.Map;
 
 import org.aicer.grok.dictionary.GrokDictionary;
+import org.aicer.grok.dictionary.Pattern;
 
 import com.google.code.regexp.MatchResult;
 import com.google.code.regexp.Matcher;
-import com.google.code.regexp.Pattern;
 
 /**
  *
@@ -16,28 +16,42 @@ import com.google.code.regexp.Pattern;
  */
 public final class Grok {
 
-  //@TODO build class capable of
-  // 1. Loading default dictionary using class loader from classpath (make sure built-in patterns are in the CP)
-  // 2. Loading additional dictionaries (if available and specified)
-  // 3. Compiling pattern
-  // 4. Executing example strings against patterns for data extraction
-
-  // For Flume, GrokInterceptor, extracted data will be injected into headers
-  // One expression per header field/body compiled and stored in maps for execution later against incoming values
+  private final Pattern compiledPattern;
 
   /**
    * Constructor
    */
-  public Grok() {
-
+  public Grok(final Pattern compiledPattern) {
+     this.compiledPattern = compiledPattern;
   }
 
+  /**
+   * Extracts named groups from the raw data
+   *
+   * @param rawData
+   * @return A map of group names mapped to thier extracted values
+   */
+  public Map<String, String> extractNamedGroups(final CharSequence rawData) {
+
+    Matcher matcher = compiledPattern.matcher(rawData);
+
+    if (matcher.find()) {
+
+      MatchResult r = matcher.toMatchResult();
+
+      if (r != null && r.namedGroups() != null) {
+        return r.namedGroups();
+      }
+    }
+
+    return null;
+  }
 
   public static void main(String[] args) {
 
-    final String rawDataLine = "1234567 - israel.ekpo@massivelogdata.net cc55ZZ35 1789 Whats going on?";
+    final String rawDataLine = "1234567 - israel.ekpo@massivelogdata.net cc55ZZ35 1789 Hello Grok";
 
-    final String expression = "%{NOTSPACE:username} %{USERNAME:password} %{INT:yearOfBirth}";
+    final String expression = "%{EMAIL:username} %{USERNAME:password} %{INT:yearOfBirth}";
 
     // Directory where the Grok pattern files are stored
     final String patternsDirectory  = args[0];
@@ -46,7 +60,9 @@ public final class Grok {
 
     final GrokDictionary dictionary = new GrokDictionary();
 
-    dictionary.load(grokPatterns);
+    dictionary.addDictionary(grokPatterns);
+
+    dictionary.bind();
 
     System.out.println("Dictionary Size: " + dictionary.getDictionarySize());
 
@@ -55,20 +71,15 @@ public final class Grok {
     System.out.println("Digested : " + digested);
     System.out.println("Haystack : " + rawDataLine);
 
-    boolean run = true;
+    Pattern compiledPattern = dictionary.compileExpression(expression);
 
-    if (run) {
-      Pattern compiledPattern = dictionary.compileExpression(expression);
-      Matcher matcher = compiledPattern.matcher(rawDataLine);
+    Grok grok = new Grok(compiledPattern);
 
-      System.out.println("Number of matches: " + matcher.groupCount());
+    Map<String, String> results = grok.extractNamedGroups(rawDataLine);
 
-      if (matcher.find()) {
-        MatchResult r = matcher.toMatchResult();
-
-        for(Map.Entry<String, String> group : r.namedGroups().entrySet()) {
-           System.out.println(group.getKey() + " = " + group.getValue());
-        }
+    if (results != null) {
+      for(Map.Entry<String, String> entry : results.entrySet()) {
+        System.out.println(entry.getKey() + "=" + entry.getValue());
       }
     }
   }

@@ -23,9 +23,9 @@ public final class Grok {
 
   public static void main(String[] args) {
 
-    final String rawDataLine = "1234567 - israel.ekpo@massivelogdata.net cc55ZZ35 1789 Massive log data incoming";
+    final String rawDataLine = "1234567 - israel.ekpo@massivelogdata.net cc55ZZ35 1789 Hello Grok";
 
-    final String expression = "%{NOTSPACE:username} %{USERNAME:password} %{INT:yearOfBirth}";
+    final String expression = "%{EMAIL:username} %{USERNAME:password} %{INT:yearOfBirth}";
 
     // Directory where the Grok pattern files are stored
     final String patternsDirectory  = args[0];
@@ -34,7 +34,9 @@ public final class Grok {
 
     final GrokDictionary dictionary = new GrokDictionary();
 
-    dictionary.load(grokPatterns);
+    dictionary.addDictionary(grokPatterns);
+
+    dictionary.bind();
 
     System.out.println("Dictionary Size: " + dictionary.getDictionarySize());
 
@@ -43,23 +45,16 @@ public final class Grok {
     System.out.println("Digested : " + digested);
     System.out.println("Haystack : " + rawDataLine);
 
-    boolean run = true;
+    Pattern compiledPattern = dictionary.compileExpression(expression);
 
-    if (run) {
-      Pattern compiledPattern = dictionary.compileExpression(expression);
-      Matcher matcher = compiledPattern.matcher(rawDataLine);
+    Grok grok = new Grok(compiledPattern);
 
+    Map<String, String> results = grok.extractNamedGroups(rawDataLine);
 
-      System.out.println("Number of matches: " + matcher.groupCount());
-
-      if (matcher.find()) {
-        MatchResult r = matcher.toMatchResult();
-
-        for(Map.Entry<String, String> group : r.namedGroups().entrySet()) {
-           System.out.println(group.getKey() + " = " + group.getValue());
-        }
+    if (results != null) {
+      for(Map.Entry<String, String> entry : results.entrySet()) {
+        System.out.println(entry.getKey() + "=" + entry.getValue());
       }
-
     }
   }
 }
