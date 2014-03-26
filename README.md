@@ -10,7 +10,7 @@ public final class GrokStage {
   public static void main(String[] args) {
 
     final String rawDataLine1 = "1234567 - israel.ekpo@massivelogdata.net cc55ZZ35 1789 Hello Grok";
-    final String rawDataLine2 = "1234567 - big.data@massivelogdata.com cc55ZZ35 2014 Welcome Grokker";
+    final String rawDataLine2 = "8833445 - big.data@massivelogdata.com qf85ZZ35 2014 Welcome Grokker";
     
     final String expression = "%{EMAIL:username} %{USERNAME:password} %{INT:yearOfBirth}";
 
