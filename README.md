@@ -9,8 +9,9 @@ public final class GrokStage {
 
   public static void main(String[] args) {
 
-    final String rawDataLine = "1234567 - israel.ekpo@massivelogdata.net cc55ZZ35 1789 Hello Grok";
-
+    final String rawDataLine1 = "1234567 - israel.ekpo@massivelogdata.net cc55ZZ35 1789 Hello Grok";
+    final String rawDataLine2 = "1234567 - big.data@massivelogdata.com cc55ZZ35 2014 Welcome Grokker";
+    
     final String expression = "%{EMAIL:username} %{USERNAME:password} %{INT:yearOfBirth}";
 
     // Directory where the Grok pattern files are stored
@@ -35,10 +36,20 @@ public final class GrokStage {
 
     Grok grok = new Grok(compiledPattern);
 
-    Map<String, String> results = grok.extractNamedGroups(rawDataLine);
+    // Extracting data from first instance of raw data
+    Map<String, String> results1 = grok.extractNamedGroups(rawDataLine1);
 
-    if (results != null) {
-      for(Map.Entry<String, String> entry : results.entrySet()) {
+    if (results1 != null) {
+      for(Map.Entry<String, String> entry : results1.entrySet()) {
+        System.out.println(entry.getKey() + "=" + entry.getValue());
+      }
+    }
+    
+    // Extracting data from second instance of raw data
+    Map<String, String> results2 = grok.extractNamedGroups(rawDataLine2);
+    
+    if (results2 != null) {
+      for(Map.Entry<String, String> entry : results2.entrySet()) {
         System.out.println(entry.getKey() + "=" + entry.getValue());
       }
     }
