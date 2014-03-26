@@ -4,22 +4,8 @@ grok
 A Java library for extracting structured data from unstructured data
 
 ```java
-package org.aicer.grok.util;
 
-import java.io.File;
-import java.util.Map;
-
-import org.aicer.grok.dictionary.GrokDictionary;
-
-import com.google.code.regexp.MatchResult;
-import com.google.code.regexp.Matcher;
-import com.google.code.regexp.Pattern;
-
-public final class Grok {
-
-  public Grok() {
-
-  }
+public final class GrokStage {
 
   public static void main(String[] args) {
 
