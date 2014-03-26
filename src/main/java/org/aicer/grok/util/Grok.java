@@ -29,7 +29,7 @@ public final class Grok {
    * Extracts named groups from the raw data
    *
    * @param rawData
-   * @return A map of group names mapped to thier extracted values
+   * @return A map of group names mapped to their extracted values or null if there are no matches
    */
   public Map<String, String> extractNamedGroups(final CharSequence rawData) {
 
