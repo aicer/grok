@@ -7,52 +7,38 @@ A Java library for extracting structured data from unstructured data
 
 public final class GrokStage {
 
+  private static final void displayResults(final Map<String, String> results) {
+    if (results != null) {
+      for(Map.Entry<String, String> entry : results.entrySet()) {
+        System.out.println(entry.getKey() + "=" + entry.getValue());
+      }
+    }
+  }
+
   public static void main(String[] args) {
 
     final String rawDataLine1 = "1234567 - israel.ekpo@massivelogdata.net cc55ZZ35 1789 Hello Grok";
-    final String rawDataLine2 = "8833445 - big.data@massivelogdata.com qf85ZZ35 2014 Welcome Grokker";
-    
+    final String rawDataLine2 = "98AA541 - israel-ekpo@israelekpo.com mmddgg22 8800 Hello Grok";
+    final String rawDataLine3 = "55BB778 - ekpo.israel@example.net secret123 4439 Valid Data Stream";
+
     final String expression = "%{EMAIL:username} %{USERNAME:password} %{INT:yearOfBirth}";
-
-    // Directory where the Grok pattern files are stored
-    final String patternsDirectory  = args[0];
-
-    final File grokPatterns = new File(patternsDirectory);
 
     final GrokDictionary dictionary = new GrokDictionary();
 
-    dictionary.addDictionary(grokPatterns);
+    // Load the built-in dictionaries
+    dictionary.addBuiltInDictionaries();
 
+    // Resolve all expressions loaded
     dictionary.bind();
 
+    // Take a look at how many expressions have been loaded
     System.out.println("Dictionary Size: " + dictionary.getDictionarySize());
 
-    final String digested = dictionary.digestExpression(expression);
+    Grok compiledPattern = dictionary.compileExpression(expression);
 
-    System.out.println("Digested : " + digested);
-    System.out.println("Haystack : " + rawDataLine);
-
-    Pattern compiledPattern = dictionary.compileExpression(expression);
-
-    Grok grok = new Grok(compiledPattern);
-
-    // Extracting data from first instance of raw data
-    Map<String, String> results1 = grok.extractNamedGroups(rawDataLine1);
-
-    if (results1 != null) {
-      for(Map.Entry<String, String> entry : results1.entrySet()) {
-        System.out.println(entry.getKey() + "=" + entry.getValue());
-      }
-    }
-    
-    // Extracting data from second instance of raw data
-    Map<String, String> results2 = grok.extractNamedGroups(rawDataLine2);
-    
-    if (results2 != null) {
-      for(Map.Entry<String, String> entry : results2.entrySet()) {
-        System.out.println(entry.getKey() + "=" + entry.getValue());
-      }
-    }
+    displayResults(compiledPattern.extractNamedGroups(rawDataLine1));
+    displayResults(compiledPattern.extractNamedGroups(rawDataLine2));
+    displayResults(compiledPattern.extractNamedGroups(rawDataLine3));
   }
 }
 
