@@ -35,6 +35,17 @@ will extract an email address, password and year of birth from the following str
 
 The PATTERN_NAME has to be defined in the dictionary and the group names, username, password and yearOfBirth will be used to retrieve the values from the extraction results.
 
+### How to Include It as a Maven Dependency
+
+```xml
+<dependency>
+    <groupId>org.aicer.grok</groupId>
+    <artifactId>grok</artifactId>
+    <version>0.9.0</version>
+</dependency>
+```
+
+### How to Use the Library ###
 
 Patterns can be loaded in 4 ways by invoking the following methods on the dictionary object.
 
