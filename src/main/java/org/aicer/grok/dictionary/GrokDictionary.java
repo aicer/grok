@@ -10,9 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.aicer.grok.exception.GrokCompilationException;
+import org.aicer.grok.util.Grok;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.code.regexp.Pattern;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
 
@@ -71,7 +73,7 @@ public final class GrokDictionary {
    * @param expression
    * @return The compiled expression
    */
-  public Pattern compileExpression(final String expression) {
+  public Grok compileExpression(final String expression) {
 
     throwErrorIfDictionaryIsNotReady();
 
@@ -79,7 +81,7 @@ public final class GrokDictionary {
 
     logger.debug("Digested [" + expression + "] into [" + digestedExpression + "] before compilation");
 
-    return Pattern.compile(digestedExpression);
+    return new Grok(Pattern.compile(digestedExpression));
   }
 
   private void digestExpressions() {
@@ -207,6 +209,35 @@ public final class GrokDictionary {
     }
   }
 
+  public void addBuiltInDictionaries() {
+    addBuiltInDictionary(BuiltInDictionary.GROK_BASE);
+    addBuiltInDictionary(BuiltInDictionary.GROK_JAVA);
+    addBuiltInDictionary(BuiltInDictionary.GROK_REDIS);
+    addBuiltInDictionary(BuiltInDictionary.GROK_SYSLOG);
+    addBuiltInDictionary(BuiltInDictionary.GROK_MONGODB);
+    addBuiltInDictionary(BuiltInDictionary.GROK_POSTGRESQL);
+  }
+
+  private void addBuiltInDictionary(BuiltInDictionary dictionaryName) {
+
+    final String filePath = dictionaryName.getFilePath();
+
+    InputStream istream = GrokDictionary.class.getClassLoader().getResourceAsStream(filePath);
+
+    if (istream == null) {
+      istream = GrokDictionary.class.getResourceAsStream(filePath);
+    }
+
+    if (istream == null) {
+      return;
+    }
+
+    logger.info("Loading Built-In dictionary: " + filePath);
+
+    addDictionary(istream);
+
+  }
+
   private void addDictionaryAux(final File file) throws IOException {
 
     if (false == file.exists()) {
@@ -238,7 +269,6 @@ public final class GrokDictionary {
     }
 
   }
-
 
   private void addDictionaryAux(Reader reader) throws IOException {
 
