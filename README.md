@@ -129,3 +129,21 @@ public final class GrokStage {
 }
 
 ```
+
+Which gives the folllowing output
+
+```
+Dictionary Size: 91
+
+username=israel.ekpo@massivelogdata.net
+password=cc55ZZ35
+yearOfBirth=1789
+
+username=israel-ekpo@israelekpo.com
+password=mmddgg22
+yearOfBirth=8800
+
+username=ekpo.israel@example.net
+password=secret123
+yearOfBirth=4439
+```
