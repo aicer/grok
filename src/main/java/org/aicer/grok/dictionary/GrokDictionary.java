@@ -270,6 +270,22 @@ public final class GrokDictionary {
 
   }
 
+  /**
+   * Adds a dictionary entry via a Reader object
+   *
+   * @param reader
+   */
+  public void addDictionary(Reader reader) {
+
+    try {
+      addDictionaryAux(reader);
+    } catch (IOException e) {
+      throw new GrokCompilationException(e);
+    } finally {
+      Closeables.closeQuietly(reader);
+    }
+  }
+
   private void addDictionaryAux(Reader reader) throws IOException {
 
     for (String currentFileLine : CharStreams.readLines(reader)) {
