@@ -4,7 +4,7 @@ A Java library for extracting structured data from unstructured data
 
 This library was inspired by the logstash inteceptor or filter available here
 
-http://logstash.net/docs/1.4.0/filters/grokdiscovery
+http://logstash.net/docs/1.4.0/filters/grok
 
 This grok library comes with pre-defined patterns 
 

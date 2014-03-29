@@ -35,6 +35,10 @@
     <developerConnection>scm:git:git@github.com:aicer/grok.git</developerConnection>
     <url>https://github.com/aicer/grok.git</url>
   </scm>
+  <issueManagement>
+    <system>GitHub Issue Management</system>
+    <url>https://github.com/aicer/grok/issues</url>
+  </issueManagement>
   <properties>
     <named.regex.version>0.2.3</named.regex.version>
   </properties>
