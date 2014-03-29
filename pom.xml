@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.aicer.grok</groupId>
   <artifactId>grok</artifactId>
-  <version>0.9.0</version>
+  <version>0.9.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Grok Data Extractor</name>
   <description>A Java library for extracting structured data from unstructured data</description>
