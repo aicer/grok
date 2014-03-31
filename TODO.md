@@ -14,6 +14,8 @@ Adding a means to override existing files globally or locally (per Grok entry)
 To minimize runtime branching and selection within loops, create dedicated handlers where overides are allowed and another handler where field overrides are not needed.
 
 
+Need to add more built-in patterns also supported by Logstash
+
 Rough Draft of GrokInterceptor Config
 ```
 
