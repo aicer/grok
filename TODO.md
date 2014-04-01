@@ -24,17 +24,17 @@ grok.override = false
 grok.patterns_dir = /home/user/grok/dictionaries
 
 # Configuration for Individual Expressions
-grok.entries.1.source = @body
-grok.entries.1.expression = %{INT:year} Copy Data from Integery
-grok.entries.1.override = true
+grok.entries.0.source = @body
+grok.entries.0.expression = %{INT:year} Copy Data from Integery
+grok.entries.0.override = true
 
 grok.entries.1.source = dataOrigin
 grok.entries.1.expression = %{IP:ip_address} Rest of the Data
 grok.entries.1.override = false
 
-grok.entries.1.source = timeField
-grok.entries.1.expression = %{DATETIME:original_datetime} Rest of the Data
-grok.entries.1.override = true
+grok.entries.2.source = timeField
+grok.entries.2.expression = %{DATETIME:original_datetime} Rest of the Data
+grok.entries.2.override = true
 
 ```
 
