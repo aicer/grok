@@ -24,23 +24,17 @@
  */
 package org.aicer.grok.dictionary;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.io.CharStreams;
+import com.google.common.io.Closeables;
 import org.aicer.grok.exception.GrokCompilationException;
 import org.aicer.grok.util.Grok;
+import org.joni.Regex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.code.regexp.Pattern;
-import com.google.common.io.CharStreams;
-import com.google.common.io.Closeables;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Grok Dictionary
@@ -75,7 +69,6 @@ public final class GrokDictionary {
   /**
    * Digests all the dictionaries loaded so far
    *
-   * @param file
    * @throws GrokCompilationException if there is a problem
    */
   public void bind() {
@@ -110,7 +103,7 @@ public final class GrokDictionary {
 
     logger.debug("Digested [" + expression + "] into [" + digestedExpression + "] before compilation");
 
-    return new Grok(Pattern.compile(digestedExpression));
+    return new Grok(new Regex(digestedExpression));
   }
 
   private void digestExpressions() {
