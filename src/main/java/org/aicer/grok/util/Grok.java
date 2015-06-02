@@ -15,13 +15,15 @@
  */
 package org.aicer.grok.util;
 
-import java.util.Map;
-
+import com.google.common.base.Strings;
 import org.aicer.grok.dictionary.GrokDictionary;
+import org.joni.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.google.code.regexp.MatchResult;
-import com.google.code.regexp.Matcher;
-import com.google.code.regexp.Pattern;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  *
@@ -30,41 +32,48 @@ import com.google.code.regexp.Pattern;
  */
 public final class Grok {
 
-  private final Pattern compiledPattern;
+    private final Regex compiledPattern;
+    private final static Logger LOGGER = LoggerFactory.getLogger(Grok.class);
 
   /**
    * Constructor
    */
-  public Grok(final Pattern compiledPattern) {
+  public Grok(final Regex compiledPattern) {
      this.compiledPattern = compiledPattern;
   }
 
   /**
    * Extracts named groups from the raw data
    *
-   * @param rawData
+   * @param rawData String to match pattern against
    * @return A map of group names mapped to their extracted values or null if there are no matches
    */
   public Map<String, String> extractNamedGroups(final CharSequence rawData) {
+      Map<String, String> namedGroups = new HashMap<>();
+      Matcher matcher = compiledPattern.matcher(rawData.toString().getBytes());
+      if (matcher.search(0, rawData.length(), Option.DEFAULT) != -1) {
+          Region region = matcher.getEagerRegion();
 
-    Matcher matcher = compiledPattern.matcher(rawData);
-
-    if (matcher.find()) {
-
-      MatchResult r = matcher.toMatchResult();
-
-      if (r != null && r.namedGroups() != null) {
-        return r.namedGroups();
+          for (Iterator<NameEntry> entry = compiledPattern.namedBackrefIterator(); entry.hasNext(); ) {
+              NameEntry e = entry.next();
+              int backRef = e.getBackRefs()[0];
+              int start = region.beg[backRef];
+              int end = region.end[backRef];
+              CharSequence charSequence = rawData.subSequence(start, end);
+              String name = new String(e.name).substring(e.nameP, e.nameEnd);
+              LOGGER.debug("{} = {}", name, charSequence);
+              namedGroups.put(name, charSequence.toString());
+          }
+          return namedGroups;
       }
-    }
 
-    return null;
+      return null;
   }
 
   private static final void displayResults(final Map<String, String> results) {
     if (results != null) {
       for(Map.Entry<String, String> entry : results.entrySet()) {
-        System.out.println(entry.getKey() + "=" + entry.getValue());
+          System.out.println(Strings.padEnd(entry.getKey(), 11, ' ') + " = " + entry.getValue());
       }
     }
   }
